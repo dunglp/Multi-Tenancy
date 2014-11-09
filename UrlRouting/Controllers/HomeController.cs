@@ -26,11 +26,13 @@ namespace UrlRouting.Controllers
         {
             List<User> users = new List<User>();
 
+            var tenantCode = RouteData.Values["tenantID"].ToString() ?? User.Identity.Name;
+
             using (var connection = new SqlConnection(connectionString))
             {
-                using (var ctx = DatabaseConnection.Create(User.Identity.Name, connection))
+                using (var ctx = DatabaseConnection.Create(tenantCode, connection))
                 {
-                    users = ctx.Users.Where(u => u.UserName.Equals(User.Identity.Name)).ToList();
+                    users = ctx.Users.Where(u => u.UserName.Equals(tenantCode)).ToList();
                 }
                 return View(users);
             }
@@ -48,9 +50,11 @@ namespace UrlRouting.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
+            var tenantCode = RouteData.Values["tenantID"].ToString() ?? User.Identity.Name;
+            
             using (var connection = new SqlConnection(connectionString))
             {
-                using (var ctx = DatabaseConnection.Create(User.Identity.Name, connection))
+                using (var ctx = DatabaseConnection.Create(tenantCode, connection))
                 {
                     var user = ctx.Users.Find(id);
                     if (user == null)
